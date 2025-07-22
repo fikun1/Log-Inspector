@@ -43,3 +43,32 @@ def inspect_log(file_path, sensitive_paths):
                     flagged_entries.append(("SENSITIVE_PATH", ip, line.strip()))
 
     return failed_logins, sensitive_hits, flagged_entries
+def print_summary(failed_logins, sensitive_hits, flagged_entries):
+    print("\n🚨 Suspicious Log Summary")
+
+    print("\n🔐 Failed Login Attempts (>= 5):")
+    for ip, count in failed_logins.items():
+        if count >= 5:
+            print(f"{ip} – {count} attempts")
+
+    print("\n🔒 Sensitive Path Accesses:")
+    for ip, count in sensitive_hits.items():
+        print(f"{ip} – {count} hits")
+
+    print("\n🧾 Top 10 Suspicious Entries:")
+    for kind, ip, line in flagged_entries[:10]:
+        print(f"[{kind}] {ip}: {line}")
+
+def main():
+    args = parse_args()
+    logfile = Path(args.logfile)
+
+    if not logfile.exists():
+        print(f"❌ Error: {logfile} does not exist.")
+        return
+
+    failed, sensitive, flagged = inspect_log(logfile, args.sensitive_paths)
+    print_summary(failed, sensitive, flagged)
+
+if __name__ == "__main__":
+    main()
